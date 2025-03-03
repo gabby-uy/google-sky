@@ -22,8 +22,8 @@
 
         /* Regular content when the phone is lying flat (near horizontal) */
         body.normal-content {
-            background-color: white; /* Or your normal background color */
-            color: black; /* Adjust text color as needed */
+            background-color: white;
+            color: black;
         }
 
     </style>
@@ -63,24 +63,18 @@
         map.setStreetView(panorama);
     }
 
-    window.onload = getStreetViewLocation;
-
     let isFlat = false;
-
+    DeviceOrientationEvent.requestPermission()
     // Add an event listener to detect device orientation
     window.addEventListener('deviceorientation', function(event) {
-        // event.alpha: Rotation around the z-axis (not useful here)
-        // event.beta: Rotation around the x-axis (forward/backward tilt)
-        // event.gamma: Rotation around the y-axis (left/right tilt)
-
-        const beta = event.beta; // Forward/backward tilt (from -180 to 180)
-        const gamma = event.gamma; // Left/right tilt (from -90 to 90)
+        const beta = event.beta;  // Forward/backward tilt (from -180 to 180)
+        const gamma = event.gamma;  // Left/right tilt (from -90 to 90)
 
         // Log beta and gamma values to check if orientation is being detected
         console.log(`Beta: ${beta}, Gamma: ${gamma}`);
 
         // Conditions to detect near horizontal (flat) position
-        if (beta >= -20 && beta <= 20 && gamma >= -20 && gamma <= 20) {
+        if (beta >= -30 && beta <= 30 && gamma >= -30 && gamma <= 30) {  // Widened the range for flatness
             isFlat = true;
         } else {
             isFlat = false;
@@ -107,6 +101,8 @@
             document.body.classList.add('black-screen');
         }
     });
+
+    window.onload = getStreetViewLocation;
     </script>
 </body>
 </html>
