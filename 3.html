@@ -21,6 +21,19 @@
             position: absolute;
             top: 0;
             left: 0;
+            transition: opacity 1s ease-in-out; /* Smooth fade-in effect */
+        }
+
+        #fade-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            opacity: 0;
+            z-index: 10; /* Layer above the street view */
+            transition: opacity 1s ease-in-out;
         }
 
         /* Black screen when the phone is not lying flat */
@@ -38,93 +51,104 @@
     </style>
 </head>
 <body onclick="getStreetViewLocation()">
+    <div id="fade-overlay"></div>
     <div id="street-view"></div>
 
     <script>
+    let panorama; // Store the current panorama object
+    let fadeOverlay = document.getElementById("fade-overlay");
+
     // Initialize the Speech Recognition API
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'en-US'; // Set the language for recognition
-    recognition.continuous = true; // Keep listening continuously
-    recognition.interimResults = true; // Show results even while speaking
-
-    // Start listening for speech
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
     recognition.start();
 
-    let timeout; // To store the timeout reference
+    let timeout; // Timeout for detecting silence
 
     // When speech is detected
     recognition.onresult = function(event) {
         const transcript = event.results[0][0].transcript.toLowerCase();
-        console.log("Speech detected: " + transcript); // Logs whatever was said
+        console.log("Speech detected: " + transcript);
 
-        // Clear any previous timeout (in case there's a new speech input)
         clearTimeout(timeout);
-
-        // Reset the timeout, setting it to call `getStreetViewLocation()` after 2 seconds of silence
         timeout = setTimeout(function() {
-            getStreetViewLocation(); // Trigger the function after silence for 2 seconds
-        }, 2000); // 2000 milliseconds = 2 seconds
+            getStreetViewLocation();
+        }, 3000);
     };
 
     recognition.onerror = function(event) {
         console.log("Speech recognition error: " + event.error);
-        // Restart recognition if it stops due to an error
         recognition.start();
     };
 
     recognition.onend = function() {
         console.log("Speech recognition ended, restarting...");
-        recognition.start(); // Restart recognition after it ends
+        recognition.start();
     };
 
+    // Function to get a random street view location
     function getStreetViewLocation() {
         let svService = new google.maps.StreetViewService();
         let lat = (Math.random() * 180 - 90).toFixed(6);
         let lng = (Math.random() * 360 - 180).toFixed(6);
         let location = { lat: parseFloat(lat), lng: parseFloat(lng) };
 
+        // Fade out the current panorama
+        fadeOverlay.style.opacity = 1; // Show fade overlay (black screen)
+
         svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
             if (status === "OK") {
+                // New panorama found, load it
                 showStreetView(data.location.latLng);
             } else {
-                getStreetViewLocation(); // Try again with a new location
+                getStreetViewLocation(); // Retry if location not found
             }
         });
     }
 
+    // Function to show street view with the new location
     function showStreetView(location) {
-        let panorama = new google.maps.StreetViewPanorama(
+        // Remove the previous panorama (if any)
+        if (panorama) {
+            panorama.setVisible(false);
+        }
+
+        // Create a new panorama object
+        panorama = new google.maps.StreetViewPanorama(
             document.getElementById("street-view"),
             {
                 position: location,
-                pov: { heading: 0, pitch: 90 }, // Look at the sky
+                pov: { heading: 0, pitch: 90 },
                 zoom: 1,
-                disableDefaultUI: true, // Hides all UI elements
-                showRoadLabels: false // Hides road labels
+                disableDefaultUI: true,
+                showRoadLabels: false
             }
         );
 
         let map = new google.maps.Map(document.createElement("div"));
         map.setStreetView(panorama);
+
+        // Fade in the new panorama
+        fadeOverlay.style.opacity = 0; // Hide fade overlay (black screen)
+        document.getElementById("street-view").style.opacity = 1; // Ensure the panorama is visible
     }
 
     window.onload = getStreetViewLocation;
 
     let isFlat = false;
 
-    // Add an event listener to detect device orientation
     window.addEventListener('deviceorientation', function(event) {
-        const beta = event.beta; // Forward/backward tilt (from -180 to 180)
-        const gamma = event.gamma; // Left/right tilt (from -90 to 90)
+        const beta = event.beta;
+        const gamma = event.gamma;
 
-        // Conditions to detect near horizontal (flat) position
         if (beta >= -20 && beta <= 20 && gamma >= -20 && gamma <= 20) {
             isFlat = true;
         } else {
             isFlat = false;
         }
 
-        // Update the body class based on orientation
         if (isFlat) {
             document.body.classList.remove('black-screen');
             document.body.classList.add('normal-content');
@@ -134,7 +158,6 @@
         }
     });
 
-    // Initial check in case the page loads flat
     window.addEventListener('load', () => {
         if (isFlat) {
             document.body.classList.add('normal-content');
