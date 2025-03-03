@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
     <title>Random Street View of the Sky</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG-d5ErJgGF6wk0TUKnyGSKccAFdItXs0"></script>
     <style>
@@ -30,7 +30,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: black;
+            background-color: whitesmoke;
             opacity: 0;
             z-index: 10; /* Layer above the street view */
             transition: opacity 1s ease-in-out;
@@ -38,15 +38,15 @@
 
         /* Black screen when the phone is not lying flat */
         body.black-screen {
-            background-color: black;
-            color: black;
+            background-color: whitesmoke;
+            color: whitesmoke;
             overflow: hidden;
         }
 
         /* Regular content when the phone is lying flat (near horizontal) */
         body.normal-content {
             background-color: white;
-            color: black;
+            color: whitesmoke;
         }
     </style>
 </head>
@@ -98,20 +98,14 @@
         // Fade out the current panorama
         fadeOverlay.style.opacity = 1; // Show fade overlay (black screen)
 
-        // Generate a random delay between 1 and 5 seconds
-        const randomDelay = Math.floor(Math.random() * 5000) + 1000;
-
-        // Wait for the random delay before changing the sky
-        setTimeout(() => {
-            svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
-                if (status === "OK") {
-                    // New panorama found, load it
-                    showStreetView(data.location.latLng);
-                } else {
-                    getStreetViewLocation(); // Retry if location not found
-                }
-            });
-        }, randomDelay);
+        svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
+            if (status === "OK") {
+                // New panorama found, load it
+                showStreetView(data.location.latLng);
+            } else {
+                getStreetViewLocation(); // Retry if location not found
+            }
+        });
     }
 
     // Function to show street view with the new location
@@ -171,6 +165,28 @@
             document.body.classList.add('black-screen');
         }
     });
+
+
+    // FULLSCREEN
+    // Scroll to hide the URL bar
+    window.addEventListener("load", function() {
+        window.scrollTo(0, 1);
+    });
+
+    function enterFullscreen() {
+    const docElm = document.documentElement;
+    if (docElm.requestFullscreen) {
+        docElm.requestFullscreen();
+    } else if (docElm.mozRequestFullScreen) { // Firefox
+        docElm.mozRequestFullScreen();
+    } else if (docElm.webkitRequestFullscreen) { // Chrome, Safari, Opera
+        docElm.webkitRequestFullscreen();
+    } else if (docElm.msRequestFullscreen) { // IE/Edge
+        docElm.msRequestFullscreen();
+    }
+}
+    // Trigger fullscreen when the page loads or through a button
+    window.onload = enterFullscreen;
     </script>
 </body>
 </html>
