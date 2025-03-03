@@ -44,6 +44,8 @@
     // Initialize the Speech Recognition API
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = 'en-US'; // Set the language for recognition
+    recognition.continuous = true; // Keep listening continuously
+    recognition.interimResults = true; // Show results even while speaking
 
     // Start listening for speech
     recognition.start();
@@ -51,16 +53,21 @@
     // When speech is detected
     recognition.onresult = function(event) {
         const transcript = event.results[0][0].transcript.toLowerCase();
-        console.log("Speech detected: " + transcript);
+        console.log("Speech detected: " + transcript); // Logs whatever was said
 
-        // Check if the user said something like "new location" or any other keyword
-        if (transcript.includes("new location") || transcript.includes("random location")) {
-            getStreetViewLocation();
-        }
+        // Call function to get a new street view location for any speech input
+        getStreetViewLocation();
     };
 
     recognition.onerror = function(event) {
         console.log("Speech recognition error: " + event.error);
+        // Restart recognition if it stops due to an error
+        recognition.start();
+    };
+
+    recognition.onend = function() {
+        console.log("Speech recognition ended, restarting...");
+        recognition.start(); // Restart recognition after it ends
     };
 
     function getStreetViewLocation() {
