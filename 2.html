@@ -32,6 +32,41 @@
     <div id="street-view"></div>
 
     <script>
+
+ // Add event listener for button click to request permission
+ document.getElementById('request-permission').addEventListener('click', function() {
+            // Check if permission is required for DeviceOrientation
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // Request permission
+                DeviceOrientationEvent.requestPermission()
+                    .then(function(response) {
+                        if (response === 'granted') {
+                            console.log('Permission granted');
+                            // Add event listener for device orientation
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        } else {
+                            console.log('Permission denied');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error requesting permission', error);
+                    });
+            } else {
+                // If permission is not required, directly add the event listener
+                console.log('Permission is not needed for this device');
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        });
+
+        // Function to handle device orientation
+        function handleOrientation(event) {
+            const beta = event.beta;  // Forward/backward tilt (from -180 to 180)
+            const gamma = event.gamma;  // Left/right tilt (from -90 to 90)
+
+            console.log(`Beta: ${beta}, Gamma: ${gamma}`);
+            // You can process the device orientation here
+        }
+        
     function getStreetViewLocation() {
         let svService = new google.maps.StreetViewService();
         let lat = (Math.random() * 180 - 90).toFixed(6);
@@ -64,7 +99,6 @@
     }
 
     let isFlat = false;
-    DeviceOrientationEvent.requestPermission()
     // Add an event listener to detect device orientation
     window.addEventListener('deviceorientation', function(event) {
         const beta = event.beta;  // Forward/backward tilt (from -180 to 180)
