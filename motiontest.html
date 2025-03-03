@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Orientation Test</title>
+</head>
+<body>
+    <h1>Device Orientation Test</h1>
+    <p>Check the console for beta and gamma values!</p>
+    
+    <script>
+        window.addEventListener('deviceorientation', function(event) {
+            console.log("Beta: " + event.beta + ", Gamma: " + event.gamma);
+        });
+    </script>
+</body>
+</html>
