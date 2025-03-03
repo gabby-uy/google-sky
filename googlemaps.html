@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Street View of the Sky</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG-d5ErJgGF6wk0TUKnyGSKccAFdItXs0"></script>
+    <style>
+        #street-view { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body onclick="getStreetViewLocation()">
+    <div id="street-view"></div>
+
+    <script>
+    function getStreetViewLocation() {
+    let svService = new google.maps.StreetViewService();
+    let lat = (Math.random() * 180 - 90).toFixed(6);
+    let lng = (Math.random() * 360 - 180).toFixed(6);
+    let location = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+    svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
+        if (status === "OK") {
+            showStreetView(data.location.latLng);
+        } else {
+            getStreetViewLocation(); // Try again with a new location
+        }
+    });
+}
+
+function showStreetView(location) {
+    let panorama = new google.maps.StreetViewPanorama(
+        document.getElementById("street-view"),
+        {
+            position: location,
+            pov: { heading: 0, pitch: 90 }, // Look at the sky
+            zoom: 1,
+            disableDefaultUI: true, // Hides all UI elements
+            showRoadLabels: false // Hides road labels
+        }
+    );
+
+    let map = new google.maps.Map(document.createElement("div"));
+    map.setStreetView(panorama);
+}
+
+window.onload = getStreetViewLocation;
+
+    </script>
+</body>
+</html>
