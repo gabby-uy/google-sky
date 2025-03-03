@@ -12,6 +12,20 @@
             padding: 0;
             width: 100%;
         }
+
+    /* Black screen when the phone is not lying flat */
+    body.black-screen {
+        background-color: black;
+        color: black;
+        overflow: hidden;
+    }
+
+    /* Regular content when the phone is lying flat (near horizontal) */
+    body.normal-content {
+        background-color: white; /* Or your normal background color */
+        color: black; /* Adjust text color as needed */
+    }
+
     </style>
 </head>
 <body onclick="getStreetViewLocation()">
@@ -51,6 +65,40 @@ function showStreetView(location) {
 
 window.onload = getStreetViewLocation;
 
+let isFlat = false;
+
+// Add an event listener to detect device orientation
+window.addEventListener('deviceorientation', function(event) {
+    // event.alpha: Rotation around the z-axis (not useful here)
+    // event.beta: Rotation around the x-axis (forward/backward tilt)
+    // event.gamma: Rotation around the y-axis (left/right tilt)
+
+    const beta = event.beta; // Forward/backward tilt (from -180 to 180)
+    const gamma = event.gamma; // Left/right tilt (from -90 to 90)
+
+    // Conditions to detect near horizontal (flat) position
+    if (beta >= -20 && beta <= 20 && gamma >= -20 && gamma <= 20) {
+        isFlat = true;
+    } else {
+        isFlat = false;
+    }
+
+    // Update the body class based on orientation
+    if (isFlat) {
+        document.body.classList.remove('black-screen');
+        document.body.classList.add('normal-content');
+    } else {
+        document.body.classList.remove('normal-content');
+        document.body.classList.add('black-screen');
+    }
+});
+
+// Initial check in case the page loads flat
+if (isFlat) {
+    document.body.classList.add('normal-content');
+} else {
+    document.body.classList.add('black-screen');
+}
     </script>
 </body>
 </html>
