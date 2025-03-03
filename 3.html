@@ -60,10 +60,10 @@
         // Clear any previous timeout (in case there's a new speech input)
         clearTimeout(timeout);
 
-        // Reset the timeout, setting it to call `getStreetViewLocation()` after 3 seconds of silence
+        // Reset the timeout, setting it to call `getStreetViewLocation()` after 2 seconds of silence
         timeout = setTimeout(function() {
-            getStreetViewLocation(); // Trigger the function after silence for 3 seconds
-        }, 3000); // 3000 milliseconds = 3 seconds
+            getStreetViewLocation(); // Trigger the function after silence for 2 seconds
+        }, 2000); // 2000 milliseconds = 2 seconds
     };
 
     recognition.onerror = function(event) {
