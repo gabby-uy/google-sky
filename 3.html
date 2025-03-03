@@ -75,7 +75,7 @@
         clearTimeout(timeout);
         timeout = setTimeout(function() {
             getStreetViewLocation();
-        }, 2000);
+        }, 3000);
     };
 
     recognition.onerror = function(event) {
@@ -98,14 +98,20 @@
         // Fade out the current panorama
         fadeOverlay.style.opacity = 1; // Show fade overlay (black screen)
 
-        svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
-            if (status === "OK") {
-                // New panorama found, load it
-                showStreetView(data.location.latLng);
-            } else {
-                getStreetViewLocation(); // Retry if location not found
-            }
-        });
+        // Generate a random delay between 1 and 5 seconds
+        const randomDelay = Math.floor(Math.random() * 5000) + 1000;
+
+        // Wait for the random delay before changing the sky
+        setTimeout(() => {
+            svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
+                if (status === "OK") {
+                    // New panorama found, load it
+                    showStreetView(data.location.latLng);
+                } else {
+                    getStreetViewLocation(); // Retry if location not found
+                }
+            });
+        }, randomDelay);
     }
 
     // Function to show street view with the new location
