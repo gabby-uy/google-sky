@@ -7,24 +7,24 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG-d5ErJgGF6wk0TUKnyGSKccAFdItXs0"></script>
     <style>
         #street-view { width: 100vw; height: 100vh; }
-        html, body{
+        html, body {
             margin: 0;
             padding: 0;
             width: 100%;
         }
 
-    /* Black screen when the phone is not lying flat */
-    body.black-screen {
-        background-color: black;
-        color: black;
-        overflow: hidden;
-    }
+        /* Black screen when the phone is not lying flat */
+        body.black-screen {
+            background-color: black;
+            color: black;
+            overflow: hidden;
+        }
 
-    /* Regular content when the phone is lying flat (near horizontal) */
-    body.normal-content {
-        background-color: white; /* Or your normal background color */
-        color: black; /* Adjust text color as needed */
-    }
+        /* Regular content when the phone is lying flat (near horizontal) */
+        body.normal-content {
+            background-color: white; /* Or your normal background color */
+            color: black; /* Adjust text color as needed */
+        }
 
     </style>
 </head>
@@ -33,72 +33,80 @@
 
     <script>
     function getStreetViewLocation() {
-    let svService = new google.maps.StreetViewService();
-    let lat = (Math.random() * 180 - 90).toFixed(6);
-    let lng = (Math.random() * 360 - 180).toFixed(6);
-    let location = { lat: parseFloat(lat), lng: parseFloat(lng) };
+        let svService = new google.maps.StreetViewService();
+        let lat = (Math.random() * 180 - 90).toFixed(6);
+        let lng = (Math.random() * 360 - 180).toFixed(6);
+        let location = { lat: parseFloat(lat), lng: parseFloat(lng) };
 
-    svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
-        if (status === "OK") {
-            showStreetView(data.location.latLng);
+        svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
+            if (status === "OK") {
+                showStreetView(data.location.latLng);
+            } else {
+                getStreetViewLocation(); // Try again with a new location
+            }
+        });
+    }
+
+    function showStreetView(location) {
+        let panorama = new google.maps.StreetViewPanorama(
+            document.getElementById("street-view"),
+            {
+                position: location,
+                pov: { heading: 0, pitch: 90 }, // Look at the sky
+                zoom: 1,
+                disableDefaultUI: true, // Hides all UI elements
+                showRoadLabels: false // Hides road labels
+            }
+        );
+
+        let map = new google.maps.Map(document.createElement("div"));
+        map.setStreetView(panorama);
+    }
+
+    window.onload = getStreetViewLocation;
+
+    let isFlat = false;
+
+    // Add an event listener to detect device orientation
+    window.addEventListener('deviceorientation', function(event) {
+        // event.alpha: Rotation around the z-axis (not useful here)
+        // event.beta: Rotation around the x-axis (forward/backward tilt)
+        // event.gamma: Rotation around the y-axis (left/right tilt)
+
+        const beta = event.beta; // Forward/backward tilt (from -180 to 180)
+        const gamma = event.gamma; // Left/right tilt (from -90 to 90)
+
+        // Log beta and gamma values to check if orientation is being detected
+        console.log(`Beta: ${beta}, Gamma: ${gamma}`);
+
+        // Conditions to detect near horizontal (flat) position
+        if (beta >= -20 && beta <= 20 && gamma >= -20 && gamma <= 20) {
+            isFlat = true;
         } else {
-            getStreetViewLocation(); // Try again with a new location
+            isFlat = false;
+        }
+
+        // Log the state of isFlat
+        console.log(`isFlat: ${isFlat}`);
+
+        // Update the body class based on orientation
+        if (isFlat) {
+            document.body.classList.remove('black-screen');
+            document.body.classList.add('normal-content');
+        } else {
+            document.body.classList.remove('normal-content');
+            document.body.classList.add('black-screen');
         }
     });
-}
 
-function showStreetView(location) {
-    let panorama = new google.maps.StreetViewPanorama(
-        document.getElementById("street-view"),
-        {
-            position: location,
-            pov: { heading: 0, pitch: 90 }, // Look at the sky
-            zoom: 1,
-            disableDefaultUI: true, // Hides all UI elements
-            showRoadLabels: false // Hides road labels
+    // Initial check in case the page loads flat
+    window.addEventListener('load', () => {
+        if (isFlat) {
+            document.body.classList.add('normal-content');
+        } else {
+            document.body.classList.add('black-screen');
         }
-    );
-
-    let map = new google.maps.Map(document.createElement("div"));
-    map.setStreetView(panorama);
-}
-
-window.onload = getStreetViewLocation;
-
-let isFlat = false;
-
-// Add an event listener to detect device orientation
-window.addEventListener('deviceorientation', function(event) {
-    // event.alpha: Rotation around the z-axis (not useful here)
-    // event.beta: Rotation around the x-axis (forward/backward tilt)
-    // event.gamma: Rotation around the y-axis (left/right tilt)
-
-    const beta = event.beta; // Forward/backward tilt (from -180 to 180)
-    const gamma = event.gamma; // Left/right tilt (from -90 to 90)
-
-    // Conditions to detect near horizontal (flat) position
-    if (beta >= -20 && beta <= 20 && gamma >= -20 && gamma <= 20) {
-        isFlat = true;
-    } else {
-        isFlat = false;
-    }
-
-    // Update the body class based on orientation
-    if (isFlat) {
-        document.body.classList.remove('black-screen');
-        document.body.classList.add('normal-content');
-    } else {
-        document.body.classList.remove('normal-content');
-        document.body.classList.add('black-screen');
-    }
-});
-
-// Initial check in case the page loads flat
-if (isFlat) {
-    document.body.classList.add('normal-content');
-} else {
-    document.body.classList.add('black-screen');
-}
+    });
     </script>
 </body>
 </html>
