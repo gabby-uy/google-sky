@@ -244,11 +244,11 @@ function handleOrientation(event) {
     const gamma = event.gamma; // Rotation around the Y-axis in degrees
 
     // Define thresholds for orientation
-    const betaThreshold = 10; // Degrees from horizontal
-    const gammaThreshold = 10; // Degrees from facing the ground
+    const betaThreshold = 20; // Degrees from horizontal
+    const gammaThreshold = 20; // Degrees from facing the ground
 
     // Check if the device is nearly horizontal and facing the ground
-    if (Math.abs(beta) <= betaThreshold && Math.abs(gamma) <= gammaThreshold) {
+    if (Math.abs(beta - -180) <= betaThreshold && Math.abs(gamma) <= gammaThreshold) {
         // Device is in the desired orientation
         document.getElementById('street-view').style.display = 'block';
         document.getElementById('transcript').style.display = 'block';
