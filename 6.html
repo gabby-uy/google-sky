@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
+    <meta http-equiv="Cache-Control" content="no-store">
     <title>Random Street View of the Sky</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG-d5ErJgGF6wk0TUKnyGSKccAFdItXs0"></script>
     <style>
@@ -23,6 +24,8 @@
             left: 0;
             transition: opacity 1s ease-in-out; /* Smooth fade-in effect */
             display: none;
+            will-change: transform;
+            
         }
 
         #fade-overlay {
@@ -287,6 +290,18 @@ function handleOrientation(event) {
 // Add event listener for device orientation
 window.addEventListener('deviceorientation', handleOrientation);
 
+
+function lockOrientation() {
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(function(error) {
+            console.error('Orientation lock failed:', error);
+        });
+    }
+}
+
+
+// Call the function to lock orientation
+lockOrientation();
     </script>
 </body>
 </html>
