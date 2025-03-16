@@ -227,10 +227,12 @@ function handleOrientation(event) {
     if (Math.abs(beta) <= betaThreshold && Math.abs(gamma) <= gammaThreshold) {
         // Device is in the desired orientation
         document.getElementById('street-view').style.display = 'block';
+        document.getElementById('transcript').style.display = 'block';
         lookUpPrompt.style.display = 'none';
     } else {
         // Device is not in the desired orientation
         document.getElementById('street-view').style.display = 'none';
+        document.getElementById('transcript').style.display = 'none';
         lookUpPrompt.style.display = 'block';
     }
 }
