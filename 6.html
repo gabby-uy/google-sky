@@ -23,7 +23,6 @@
             left: 0;
             transition: opacity 1s ease-in-out; /* Smooth fade-in effect */
             display: none;
-            will-change: transform;
             
         }
 
@@ -50,7 +49,6 @@
             z-index: 100;
             font-family:Helvetica, sans-serif;
             text-align: center;
-            display: none;
         }
 
         #enable-orientation{
@@ -290,9 +288,6 @@ function handleOrientation(event) {
         removeLookUpPrompt()
 
     } else {
-        // Device is not in the desired orientation
-        document.getElementById('street-view').style.display = 'none';
-        document.getElementById('transcript').style.display = 'none';
         createLookUpPrompt();
     }
 }
