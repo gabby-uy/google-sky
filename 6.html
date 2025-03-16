@@ -51,6 +51,12 @@
             display: none;
         }
 
+        #enable-orientation{
+            z-index: 101;
+            position: absolute;
+            top: 60%;
+            left: 50%;
+        }
 
     </style>
 </head>
@@ -58,6 +64,7 @@
     <div id="fade-overlay"></div>
     <div id="street-view"></div>
     <div id="transcript">I'm listening...</div>
+    <button id="enable-orientation">Enable Orientation</button>
 
     <script>
         let panorama;
@@ -68,6 +75,23 @@
         window.addEventListener('deviceorientation', handleOrientation, true);
 
 
+        document.getElementById('enable-orientation').addEventListener('click', function() {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS 13+
+        DeviceOrientationEvent.requestPermission()
+            .then(response => {
+                if (response === 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                    // Optionally, hide the button after granting permission
+                    this.style.display = 'none';
+                }
+            })
+            .catch(console.error);
+    } else {
+        // Non-iOS 13+
+        window.addEventListener('deviceorientation', handleOrientation);
+    }
+});
 
 
         // Initialize Speech Recognition
