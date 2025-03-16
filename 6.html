@@ -199,14 +199,23 @@
             // Clear the previous timeout (reset the silence detection)
             clearTimeout(timeout);
 
-            // Set a new timeout to update the street view after 1 second of silence
-            timeout = setTimeout(() => {
-                // Clear the transcript after 1 second of silence
-                document.getElementById("transcript").innerText = '';
-                loadStreetView();  // Update the street view after silence
-            }, 1000); // 1000 milliseconds = 1 second of silence
-        };
+// Set a new timeout to update the street view after 1 second of silence
+timeout = setTimeout(async () => {
+        // Clear the transcript after 1 second of silence
+        await clearTranscript();  // Wait for the transcript to clear
 
+        // Update the street view after silence
+        loadStreetView();  
+    }, 1000); // 1000 milliseconds = 1 second of silence
+};        
+
+// Function to clear the transcript
+function clearTranscript() {
+    return new Promise((resolve) => {
+        document.getElementById("transcript").innerText = '';
+        resolve();
+    });
+}
         // Start speech recognition after checking microphone permission
         checkMicrophonePermission();
 
