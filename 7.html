@@ -58,6 +58,7 @@
     <script>
         let panorama; // Store the current panorama object
         let fadeOverlay = document.getElementById("fade-overlay");
+        let timeout;
 
         // Initialize Speech Recognition
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -84,84 +85,94 @@
                 });
         }
 
-        // Function to load a random street view location
-        function loadStreetView() {
-            let svService = new google.maps.StreetViewService();
-            let lat = (Math.random() * 180 - 90).toFixed(6);
-            let lng = (Math.random() * 360 - 180).toFixed(6);
-            let location = { lat: parseFloat(lat), lng: parseFloat(lng) };
+// Function to load a random street view location
+function loadStreetView() {
+    let svService = new google.maps.StreetViewService();
+    let lat = (Math.random() * 180 - 90).toFixed(6); // Generate a random latitude
+    let lng = (Math.random() * 360 - 180).toFixed(6); // Generate a random longitude
+    let location = { lat: parseFloat(lat), lng: parseFloat(lng) };
 
-            // Fade out the current panorama
-            fadeOverlay.style.opacity = 1; // Show fade overlay (black screen)
+    // Fade out the current panorama
+    fadeOverlay.style.opacity = 1; // Show fade overlay (black screen)
 
-            svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
-                if (status === "OK") {
-                    // New panorama found, load it
-                    showStreetView(data.location.latLng);
-                } else {
-                    loadStreetView(); // Retry if location not found
-                }
-            });
+    svService.getPanorama({ location: location, radius: 50000 }, function(data, status) {
+        if (status === "OK") {
+            // New panorama found, load it
+            showStreetView(data.location.latLng);
+        } else {
+            loadStreetView(); // Retry if location not found
         }
+    });
+}
 
-        // Function to show street view with the new location
-        function showStreetView(location) {
-            // Remove the previous panorama (if any)
-            if (panorama) {
-                panorama.setVisible(false);
-            }
+// Function to show street view with the new location
+function showStreetView(location) {
+    // Remove the previous panorama (if any)
+    if (panorama) {
+        panorama.setVisible(false);
+    }
 
-            // Create a new panorama object
-            panorama = new google.maps.StreetViewPanorama(
-                document.getElementById("street-view"),
-                {
-                    position: location,
-                    pov: { heading: 0, pitch: 90 },
-                    zoom: 1,
-                    disableDefaultUI: true,
-                    showRoadLabels: false,
-                    gestureHandling: 'none', // Disable all gestures (pan, zoom, rotate, tilt)
-                    rotateControl: false, // Hide rotate control
-                    scaleControl: false, // Hide scale control
-                }
-            );
-
-            let map = new google.maps.Map(document.createElement("div"));
-            map.setStreetView(panorama);
-
-            // Fade in the new panorama
-            fadeOverlay.style.opacity = 0; // Hide fade overlay (black screen)
-            document.getElementById("street-view").style.opacity = 1; // Ensure the panorama is visible
+    // Create a new panorama object
+    panorama = new google.maps.StreetViewPanorama(
+        document.getElementById("street-view"),
+        {
+            position: location,
+            pov: { heading: 0, pitch: 90 }, // Show sky
+            zoom: 1,
+            disableDefaultUI: true,
+            showRoadLabels: false,
+            gestureHandling: 'none', // Disable all gestures (pan, zoom, rotate, tilt)
+            rotateControl: false, // Hide rotate control
+            scaleControl: false, // Hide scale control
         }
+    );
 
-        // Handle speech recognition results
-        recognition.onresult = (event) => {
-            let finalTranscript = '';
-            let interimTranscript = '';
+    let map = new google.maps.Map(document.createElement("div"));
+    map.setStreetView(panorama);
 
-            // Iterate through the results
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const result = event.results[i];
-                if (result.isFinal) {
-                    finalTranscript += result[0].transcript + '\n';
-                } else {
-                    interimTranscript += result[0].transcript;
-                }
-            }
+    // Fade in the new panorama
+    fadeOverlay.style.opacity = 0; // Hide fade overlay (black screen)
+    document.getElementById("street-view").style.opacity = 1; // Ensure the panorama is visible
+}
 
-            // Update the transcript display
-            document.getElementById('transcript').innerText = finalTranscript + interimTranscript;
+// Handle speech recognition results
+recognition.onresult = (event) => {
+    let finalTranscript = '';
+    let interimTranscript = '';
 
-            // Clear the previous timeout (reset the silence detection)
-            clearTimeout(timeout);
+    // Iterate through the results
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+            finalTranscript += result[0].transcript + '\n';
+        } else {
+            interimTranscript += result[0].transcript;
+        }
+    }
 
-            // Set a new timeout to update the street view after 1 second of silence
-            timeout = setTimeout(() => {
-                // Clear the transcript after 1 second of silence
-                document.getElementById("transcript").innerText = '';
-                loadStreetView();  // Update the street view after silence
-            }, 1000); // 1000 milliseconds = 1 second of silence
-        };
+    // Update the transcript display
+    document.getElementById('transcript').innerText = finalTranscript + interimTranscript;
+
+    // Clear the previous timeout (reset the silence detection)
+    clearTimeout(timeout);
+
+    // Set a new timeout to update the street view after 1 second of silence
+    timeout = setTimeout(async () => {
+        // Clear the transcript after 1 second of silence
+        await clearTranscript();  // Wait for the transcript to clear
+
+        // Update the street view after silence
+        loadStreetView();  
+    }, 1000); // 1000 milliseconds = 1 second of silence
+};
+
+// Function to clear the transcript
+function clearTranscript() {
+    return new Promise((resolve) => {
+        document.getElementById("transcript").innerText = '';
+        resolve();
+    });
+}
 
         // Start speech recognition after checking microphone permission
         checkMicrophonePermission();
