@@ -204,6 +204,17 @@
             // Clear the previous timeout (reset the silence detection)
             clearTimeout(timeout);
 
+            function lockOrientation() {
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(function(error) {
+            console.error('Orientation lock failed:', error);
+        });
+    }
+}
+
+// Call the function to lock orientation
+lockOrientation();
+
 // Set a new timeout to update the street view after 1 second of silence
 timeout = setTimeout(async () => {
         // Clear the transcript after 1 second of silence
@@ -292,18 +303,6 @@ function handleOrientation(event) {
 // Add event listener for device orientation
 window.addEventListener('deviceorientation', handleOrientation);
 
-
-function lockOrientation() {
-    if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(function(error) {
-            console.error('Orientation lock failed:', error);
-        });
-    }
-}
-
-
-// Call the function to lock orientation
-lockOrientation();
 
     </script>
 </body>
