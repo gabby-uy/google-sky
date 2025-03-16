@@ -51,6 +51,15 @@
             display: none;
         }
 
+        #enable-orientation{
+            z-index: 101;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: Helvetica, sans-serif;
+            font-size: 24px;
+        }
 
     </style>
 </head>
@@ -58,6 +67,8 @@
     <div id="fade-overlay"></div>
     <div id="street-view"></div>
     <div id="transcript">I'm listening...</div>
+    <button id="enable-orientation" onclick="hideButton()">ENABLE ORIENTATION</button>
+
 
     <script>
         let panorama;
@@ -67,7 +78,28 @@
 
         window.addEventListener('deviceorientation', handleOrientation, true);
 
+        function hideButton() {
+    document.getElementById('enable-orientation').style.display = 'none';
+}
 
+
+        document.getElementById('enable-orientation').addEventListener('click', function() {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS 13+
+        DeviceOrientationEvent.requestPermission()
+            .then(response => {
+                if (response === 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                    // Optionally, hide the button after granting permission
+                    this.style.display = 'none';
+                }
+            })
+            .catch(console.error);
+    } else {
+        // Non-iOS 13+
+        window.addEventListener('deviceorientation', handleOrientation);
+    }
+});
 
 
         // Initialize Speech Recognition
@@ -220,17 +252,21 @@ function handleOrientation(event) {
     const gamma = event.gamma; // Rotation around the Y-axis in degrees
 
     // Define thresholds for orientation
-    const betaThreshold = 10; // Degrees from horizontal
-    const gammaThreshold = 10; // Degrees from facing the ground
+    const betaThreshold = 40; // Degrees from horizontal
+    const gammaThreshold = 40; // Degrees from facing the ground
 
     // Check if the device is nearly horizontal and facing the ground
-    if (Math.abs(beta) <= betaThreshold && Math.abs(gamma) <= gammaThreshold) {
+    if (Math.abs(beta - -180) <= betaThreshold && Math.abs(gamma) <= gammaThreshold) {
         // Device is in the desired orientation
         document.getElementById('street-view').style.display = 'block';
-        lookUpPrompt.style.display = 'none';
+        document.getElementById('transcript').style.display = 'block';
+        // Hide the "Look up" prompt with a slight delay to avoid flickering
+        setTimeout(() => { lookUpPrompt.style.display = 'none';}, 200); // Adjust the delay time as needed
+
     } else {
         // Device is not in the desired orientation
         document.getElementById('street-view').style.display = 'none';
+        document.getElementById('transcript').style.display = 'none';
         lookUpPrompt.style.display = 'block';
     }
 }
