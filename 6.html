@@ -57,6 +57,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            font-family: Helvetica, sans-serif;
+            font-size: 24px;
         }
 
     </style>
@@ -65,7 +67,8 @@
     <div id="fade-overlay"></div>
     <div id="street-view"></div>
     <div id="transcript">I'm listening...</div>
-    <button id="enable-orientation">Enable Orientation</button>
+    <button id="enable-orientation" onclick="hideButton()">ENABLE ORIENTATION</button>
+
 
     <script>
         let panorama;
@@ -74,6 +77,10 @@
         let transcript = document.getElementById("transcript");
 
         window.addEventListener('deviceorientation', handleOrientation, true);
+
+        function hideButton() {
+    document.getElementById('enable-orientation').style.display = 'none';
+}
 
 
         document.getElementById('enable-orientation').addEventListener('click', function() {
@@ -245,8 +252,8 @@ function handleOrientation(event) {
     const gamma = event.gamma; // Rotation around the Y-axis in degrees
 
     // Define thresholds for orientation
-    const betaThreshold = 20; // Degrees from horizontal
-    const gammaThreshold = 20; // Degrees from facing the ground
+    const betaThreshold = 30; // Degrees from horizontal
+    const gammaThreshold = 30; // Degrees from facing the ground
 
     // Check if the device is nearly horizontal and facing the ground
     if (Math.abs(beta - -180) <= betaThreshold && Math.abs(gamma) <= gammaThreshold) {
