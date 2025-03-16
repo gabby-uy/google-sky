@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Transcript</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: white; 
+            color: black; 
+            margin: 20px; 
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div id="transcript">Listening...</div>
+
+    <script>
+        window.onload = () => {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (event) => {
+                let transcript = "";
+                for (let i = 0; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript + " ";
+                }
+                document.getElementById("transcript").innerText = transcript;
+            };
+
+            recognition.start();
+        };
+    </script>
+</body>
+</html>
