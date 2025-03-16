@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
-    <meta http-equiv="Cache-Control" content="no-store">
     <title>Random Street View of the Sky</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG-d5ErJgGF6wk0TUKnyGSKccAFdItXs0"></script>
     <style>
@@ -70,7 +69,6 @@
     #lookUpPrompt{
         display:none;
     }
-
     </style>
 
 
@@ -181,7 +179,8 @@ function handleOrientation(event) {
                     zoom: 1,
                     disableDefaultUI: true,
                     showRoadLabels: false,
-                    gestureHandling: none,
+                    heading: 0,
+                    gestureHandling: "none",
                     rotateControl: false, // Hide rotate control
                     scaleControl: false, // Hide scale control
                 }
