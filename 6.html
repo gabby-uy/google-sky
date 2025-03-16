@@ -72,6 +72,8 @@
     }
 
     </style>
+
+
 </head>
 <body>
     <div id="fade-overlay"></div>
@@ -89,18 +91,19 @@
         window.addEventListener('deviceorientation', handleOrientation, true);
 
         function hideButton() {
-    document.getElementById('enable-orientation').style.display = 'none';
-}
+            document.getElementById('enable-orientation').style.display = 'none';
+        }
 
+        function requestOrientationPermission() {
+    // Hide the button right when clicked
+    hideButton();
 
-function requestOrientationPermission() {
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
         // iOS 13+
         DeviceOrientationEvent.requestPermission()
             .then(response => {
                 if (response === 'granted') {
                     window.addEventListener('deviceorientation', handleOrientation);
-                    hideButton();
                 } else {
                     alert('Orientation permission not granted.');
                 }
@@ -109,13 +112,13 @@ function requestOrientationPermission() {
     } else {
         // Non-iOS 13+
         window.addEventListener('deviceorientation', handleOrientation);
-        hideButton();
     }
 }
 
 function handleOrientation(event) {
     // Process orientation data
 }
+
 
         // Initialize Speech Recognition
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -213,16 +216,6 @@ function handleOrientation(event) {
             // Clear the previous timeout (reset the silence detection)
             clearTimeout(timeout);
 
-            function lockOrientation() {
-    if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(function(error) {
-            console.error('Orientation lock failed:', error);
-        });
-    }
-}
-
-// Call the function to lock orientation
-lockOrientation();
 
 // Set a new timeout to update the street view after 1 second of silence
 timeout = setTimeout(async () => {
