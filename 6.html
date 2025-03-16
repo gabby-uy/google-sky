@@ -232,8 +232,6 @@ function clearTranscript() {
         resolve();
     });
 }
-        // Start speech recognition after checking microphone permission
-        checkMicrophonePermission();
 
 
 // Function to create and display the "Look up" prompt
@@ -253,7 +251,7 @@ function createLookUpPrompt() {
         promptDiv.style.display = 'flex';
         promptDiv.style.justifyContent = 'center';
         promptDiv.style.alignItems = 'center';
-        promptDiv.style.fontSize = '24px';
+        promptDiv.style.fontSize = '12px';
         promptDiv.style.fontFamily = 'Helvetica, sans-serif';
         promptDiv.style.textAlign = 'center';
         promptDiv.style.zIndex = '1000';
@@ -289,19 +287,21 @@ function handleOrientation(event) {
         // Device is in the desired orientation
         document.getElementById('street-view').style.display = 'block';
         document.getElementById('transcript').style.display = 'block';
-        lookUpPrompt()
+        removeLookUpPrompt()
 
     } else {
         // Device is not in the desired orientation
         document.getElementById('street-view').style.display = 'none';
         document.getElementById('transcript').style.display = 'none';
-        removeLookUpPrompt()
+        createLookUpPrompt();
     }
 }
 
 // Add event listener for device orientation
 window.addEventListener('deviceorientation', handleOrientation);
 
+// Start speech recognition after checking microphone permission
+checkMicrophonePermission();
 
     </script>
 </body>
