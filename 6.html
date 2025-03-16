@@ -77,7 +77,7 @@
     <div id="fade-overlay"></div>
     <div id="street-view"></div>
     <div id="transcript">I'm listening...</div>
-    <!-- <button id="enable-orientation" onclick="hideButton()">ENABLE ORIENTATION</button> -->
+   <button id="enable-orientation" onclick="hideButton()">ENABLE ORIENTATION</button>
 
 
     <script>
@@ -94,6 +94,7 @@
 
 
         document.getElementById('enable-orientation').addEventListener('click', function() {
+            
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
         // iOS 13+
         DeviceOrientationEvent.requestPermission()
