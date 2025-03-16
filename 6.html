@@ -93,24 +93,24 @@
         }
 
         function requestOrientationPermission() {
-    // Hide the button right when clicked
-    hideButton();
+            // Hide the button right when clicked
+            hideButton();
 
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // iOS 13+
-        DeviceOrientationEvent.requestPermission()
-            .then(response => {
-                if (response === 'granted') {
-                    window.addEventListener('deviceorientation', handleOrientation);
-                } else {
-                    alert('Orientation permission not granted.');
-                }
-            })
-            .catch(console.error);
-    } else {
-        // Non-iOS 13+
-        window.addEventListener('deviceorientation', handleOrientation);
-    }
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS 13+
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        } else {
+                            alert('Orientation permission not granted.');
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Non-iOS 13+
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
 }
 
 function handleOrientation(event) {
