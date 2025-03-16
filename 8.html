@@ -69,7 +69,7 @@
     <div id="fade-overlay"></div>
     <div id="street-view"></div>
     <div id="transcript">I'm listening...</div>
-    <button id="enable-orientation" onclick="requestOrientationPermission(), hideButton()">ENABLE ORIENTATION</button>
+    <button id="enable-orientation" onclick="requestOrientationPermission(), this.hidden = true;">ENABLE ORIENTATION</button>
     
 
     <script>
@@ -87,11 +87,6 @@
         recognition.interimResults = true;  // Allow interim results
 
         let timeout; // Timeout variable to track silence
-
-
-        function hideButton() {
-    document.getElementById('myButton').style.display = 'none';
-}
 
         // Function to request orientation permission
         function requestOrientationPermission() {
