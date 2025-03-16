@@ -67,6 +67,10 @@
             fill: none;
         }
 
+        #lookUpPrompt{
+            display:'none';
+        }
+
     </style>
 </head>
 <body>
@@ -255,6 +259,7 @@ function createLookUpPrompt() {
         promptDiv.style.fontFamily = 'Helvetica, sans-serif';
         promptDiv.style.textAlign = 'center';
         promptDiv.style.zIndex = '1000';
+        promptDiv.style.display= 'block';
 
         // Add the prompt text
         promptDiv.innerHTML = 'Look up!';
