@@ -67,10 +67,6 @@
             fill: none;
         }
 
-        #lookUpPrompt{
-            display:'none';
-        }
-
     </style>
 </head>
 <body>
@@ -254,13 +250,12 @@ function createLookUpPrompt() {
         promptDiv.style.backgroundColor = 'black';
         promptDiv.style.color = 'white';
         promptDiv.style.display = 'flex';
-        promptDiv.style.justifyContent = 'center';
-        promptDiv.style.alignItems = 'center';
+        promptDiv.style.justifyContent = 'center'; // Center horizontally
+        promptDiv.style.alignItems = 'center'; // Center vertically
         promptDiv.style.fontSize = '24px';
         promptDiv.style.fontFamily = 'Helvetica, sans-serif';
         promptDiv.style.textAlign = 'center';
         promptDiv.style.zIndex = '1000';
-        promptDiv.style.display= 'block';
 
         // Add the prompt text
         promptDiv.innerHTML = 'Look up!';
