@@ -80,11 +80,6 @@
 
         window.addEventListener('deviceorientation', handleOrientation, true);
 
-
-        hideButton() {
-            document.getElementById('enable-orientation').style.display = 'none';
-        }
-
         // Initialize Speech Recognition
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'en-US';
@@ -92,6 +87,32 @@
         recognition.interimResults = true;  // Allow interim results
 
         let timeout; // Timeout variable to track silence
+
+
+        function hideButton() {
+    document.getElementById('myButton').style.display = 'none';
+}
+
+        // Function to request orientation permission
+        function requestOrientationPermission() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            // iOS 13+
+            DeviceOrientationEvent.requestPermission()
+                .then(response => {
+                    if (response === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation);
+                        hideButton();
+                    } else {
+                        alert('Orientation permission not granted.');
+                    }
+                })
+                .catch(console.error);
+        } else {
+            // Non-iOS 13+
+            window.addEventListener('deviceorientation', handleOrientation);
+            hideButton();
+        }
+         }
 
         // Function to request microphone permission
         function checkMicrophonePermission() {
