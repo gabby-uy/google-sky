@@ -195,6 +195,7 @@ recognition.interimResults = true;  // Allow interim results
 
         // Handle speech recognition results
         let updateTimeout;
+        let lastFinalTranscript = ''; // Store last final transcript to prevent duplicate updates
 
         recognition.onresult = (event) => {
             let finalTranscript = '';
@@ -209,21 +210,23 @@ recognition.interimResults = true;  // Allow interim results
                 }
             }
 
-            // Show interim transcript live
-            document.getElementById('transcript').style.opacity = "0.5"; // Reduce opacity for transition
-            document.getElementById('transcript').innerText = interimTranscript;
+            const transcriptElement = document.getElementById('transcript');
+
+        // Update interim transcript only if it has changed
+            if (transcriptElement.innerText !== lastFinalTranscript + interimTranscript) {
+                transcriptElement.innerText = lastFinalTranscript + interimTranscript;
+            }
 
             if (finalTranscript) {
                 clearTimeout(updateTimeout);
+                lastFinalTranscript += finalTranscript; // Append new final transcript
+                
                 updateTimeout = setTimeout(() => {
-                    document.getElementById('transcript').innerText = finalTranscript;
-                    document.getElementById('transcript').style.opacity = "1"; // Fade in final text
-                }, 300);
+                    transcriptElement.innerText = lastFinalTranscript; // Keep all spoken words
+                }, 500); // Add slight delay to avoid excessive updates
             }
-
-            // Update the transcript display
-            document.getElementById('transcript').innerText = finalTranscript + interimTranscript;
-
+        
+ 
             // Clear the previous timeout (reset the silence detection)
             clearTimeout(timeout);
 
@@ -265,7 +268,7 @@ function createLookUpPrompt() {
         promptDiv.style.zIndex = '1000';
 
         // Add the prompt text
-        promptDiv.innerHTML = 'Look up!';
+        promptDiv.innerHTML = 'LIE DOWN<br>& LOOK UP';
 
         // Append the prompt to the body
         document.body.appendChild(promptDiv);
