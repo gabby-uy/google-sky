@@ -271,13 +271,8 @@ let smoothedBeta = -180; // Initialize smoothed values
 let smoothedGamma = 0;
 const alpha = 0.1; // Smoothing factor (higher = faster response)
 
-function normalizeBeta(beta) {
-    // Ensure beta is always between -180 and 180
-    return (beta + 360) % 360 - 180;
-}
-
 function handleOrientation(event) {
-    let beta = normalizeBeta(event.beta); // Normalize the beta value
+    let beta = event.beta; // Use the raw beta value
     let gamma = event.gamma; // Rotation around the Y-axis (tilt left/right)
 
     // Apply smoothing to reduce noise
@@ -286,29 +281,27 @@ function handleOrientation(event) {
 
     // Define thresholds
     const betaTarget = -180; // Target angle for downward-facing
-    const betaThreshold = 40; // Allowed error range
-    const gammaThreshold = 40; // Allowed range for left/right tilt
+    const betaThreshold = 30; // Allowed error range from -180 degrees
+    const gammaThreshold = 30; // Allowed range for left/right tilt
 
     console.log(`Beta: ${smoothedBeta}, Gamma: ${smoothedGamma}`); // Debugging logs
 
-    // Check if the device is in the desired orientation
-    if ((smoothedBeta >= betaTarget - betaThreshold || smoothedBeta <= betaTarget + betaThreshold) &&
-        Math.abs(smoothedGamma) <= gammaThreshold) {
-        // Device is in the desired range (facing downward)
+    // Check if the device is facing the ground (within 30 degrees)
+    if (smoothedBeta >= betaTarget - betaThreshold && smoothedBeta <= betaTarget + betaThreshold) {
+        // Device is facing the ground within the tolerance (no "Look Up" prompt)
         removeLookUpPrompt();
         document.getElementById('street-view').style.display = 'block';
         document.getElementById('transcript').style.display = 'block';
     } else {
-        // Device is outside the desired range (not facing downward)
+        // Device is not facing the ground (show the "Look Up" prompt)
+        createLookUpPrompt();
         document.getElementById('street-view').style.display = 'none';
         document.getElementById('transcript').style.display = 'none';
-        createLookUpPrompt();
     }
 }
 
 // Listen for device orientation events
 window.addEventListener("deviceorientation", handleOrientation);
-
 
 // Start speech recognition after checking microphone permission
 checkMicrophonePermission();
