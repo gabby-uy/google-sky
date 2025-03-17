@@ -40,7 +40,7 @@
 
         #transcript {
             font-size: 24px;
-            color: black;
+            color: whitesmoke;
             max-width: 80%;
             position: absolute;
             top: 50%;
@@ -195,36 +195,37 @@ recognition.interimResults = true;  // Allow interim results
 
         // Handle speech recognition results
         let updateTimeout;
-let lastFinalTranscript = ''; // Store last final transcript to prevent duplicate updates
 
-recognition.onresult = (event) => {
-    let finalTranscript = '';
-    let interimTranscript = '';
+        recognition.onresult = (event) => {
+            let finalTranscript = '';
+            let interimTranscript = '';
 
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-            finalTranscript += result[0].transcript + ' ';
-        } else {
-            interimTranscript += result[0].transcript;
-        }
-    }
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                if (result.isFinal) {
+                    finalTranscript += result[0].transcript + '\n';
+                } else {
+                    interimTranscript += result[0].transcript;
+                }
+            }
 
-    const transcriptElement = document.getElementById('transcript');
+            // Show interim transcript live
+            document.getElementById('transcript').style.opacity = "0.5"; // Reduce opacity for transition
+            document.getElementById('transcript').innerText = interimTranscript;
 
-    // Update interim transcript only if it has changed
-    if (transcriptElement.innerText !== lastFinalTranscript + interimTranscript) {
-        transcriptElement.innerText = lastFinalTranscript + interimTranscript;
-    }
+            if (finalTranscript) {
+                clearTimeout(updateTimeout);
+                updateTimeout = setTimeout(() => {
+                    document.getElementById('transcript').innerText = finalTranscript;
+                    document.getElementById('transcript').style.opacity = "1"; // Fade in final text
+                }, 300);
+            }
 
-    if (finalTranscript) {
-        clearTimeout(updateTimeout);
-        lastFinalTranscript += finalTranscript; // Append new final transcript
-        
-        updateTimeout = setTimeout(() => {
-            transcriptElement.innerText = lastFinalTranscript; // Keep all spoken words
-        }, 500); // Add slight delay to avoid excessive updates
-    }
+            // Update the transcript display
+            document.getElementById('transcript').innerText = finalTranscript + interimTranscript;
+
+            // Clear the previous timeout (reset the silence detection)
+            clearTimeout(timeout);
 
 // Function to clear the transcript
 function clearTranscript() {
@@ -264,7 +265,7 @@ function createLookUpPrompt() {
         promptDiv.style.zIndex = '1000';
 
         // Add the prompt text
-        promptDiv.innerHTML = 'LIE DOWN & LOOK UP';
+        promptDiv.innerHTML = 'Look up!';
 
         // Append the prompt to the body
         document.body.appendChild(promptDiv);
@@ -279,34 +280,52 @@ function removeLookUpPrompt() {
     }
 }
 
+let smoothedBeta = -180; // Initialize smoothed values
+let smoothedGamma = 0;
+const alpha = 0.1; // Smoothing factor (higher = faster response)
 
-// Function to handle device orientation
+function normalizeBeta(beta) {
+    // Ensure beta is always between -180 and 180
+    return (beta + 360) % 360 - 180;
+}
+
 function handleOrientation(event) {
-    const beta = event.beta; // Rotation around the X-axis in degrees
-    const gamma = event.gamma; // Rotation around the Y-axis in degrees
+    let beta = normalizeBeta(event.beta); // Normalize the beta value
+    let gamma = event.gamma; // Rotation around the Y-axis (tilt left/right)
 
-    // Define thresholds for orientation
-    const betaThreshold = 40; // Degrees from horizontal
-    const gammaThreshold = 40; // Degrees from facing the ground
+    // Apply smoothing to reduce noise
+    smoothedBeta = alpha * beta + (1 - alpha) * smoothedBeta;
+    smoothedGamma = alpha * gamma + (1 - alpha) * smoothedGamma;
 
-    // Check if the device is nearly horizontal and facing the ground
-    if (Math.abs(beta - -180) <= betaThreshold && Math.abs(gamma) <= gammaThreshold) {
-        // Device is in the desired orientation
+    // Define thresholds
+    const betaTarget = -180; // Target angle for downward-facing
+    const betaThreshold = 40; // Allowed error range
+    const gammaThreshold = 40; // Allowed range for left/right tilt
+
+    console.log(`Beta: ${smoothedBeta}, Gamma: ${smoothedGamma}`); // Debugging logs
+
+    // Check if the device is in the desired orientation
+    if ((smoothedBeta >= betaTarget - betaThreshold || smoothedBeta <= betaTarget + betaThreshold) &&
+        Math.abs(smoothedGamma) <= gammaThreshold) {
+        // Device is in the desired range (facing downward)
+        removeLookUpPrompt();
         document.getElementById('street-view').style.display = 'block';
         document.getElementById('transcript').style.display = 'block';
-        removeLookUpPrompt()
-
     } else {
+        // Device is outside the desired range (not facing downward)
+        document.getElementById('street-view').style.display = 'none';
+        document.getElementById('transcript').style.display = 'none';
         createLookUpPrompt();
     }
 }
 
-// Add event listener for device orientation
-window.addEventListener('deviceorientation', handleOrientation);
+// Listen for device orientation events
+window.addEventListener("deviceorientation", handleOrientation);
 
 
 // Start speech recognition after checking microphone permission
 checkMicrophonePermission();
+checkOrientationPermission();
 
     </script>
 </body>
