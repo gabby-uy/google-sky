@@ -218,7 +218,6 @@ function handleOrientation(event) {
 
 // Set a new timeout to update the street view after 1500 seconds of silence
 timeout = setTimeout(async () => { await clearTranscript();  }, 1500); // 1500 milliseconds = 1.5 seconds of silence
-
 timeout = setTimeout(async () => { await loadStreetView();  }, 3000); // 3000 milliseconds = 3 seconds of silence
 };               
 
