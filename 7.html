@@ -86,6 +86,8 @@
 
         window.addEventListener('deviceorientation', handleOrientation, true);
 
+        createLookUpPrompt()
+
         function hideButton() {
             document.getElementById('enable-orientation').style.display = 'none';
         }
@@ -195,40 +197,36 @@ recognition.interimResults = true;  // Allow interim results
 
         // Handle speech recognition results
         let updateTimeout;
-        let lastFinalTranscript = ''; // Store last final transcript to prevent duplicate updates
+let lastFinalTranscript = ''; // Store last final transcript to prevent duplicate updates
 
-        recognition.onresult = (event) => {
-            let finalTranscript = '';
-            let interimTranscript = '';
+recognition.onresult = (event) => {
+    let finalTranscript = '';
+    let interimTranscript = '';
 
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const result = event.results[i];
-                if (result.isFinal) {
-                    finalTranscript += result[0].transcript + '\n';
-                } else {
-                    interimTranscript += result[0].transcript;
-                }
-            }
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+            finalTranscript += result[0].transcript + ' ';
+        } else {
+            interimTranscript += result[0].transcript;
+        }
+    }
 
-            const transcriptElement = document.getElementById('transcript');
+    const transcriptElement = document.getElementById('transcript');
 
-        // Update interim transcript only if it has changed
-            if (transcriptElement.innerText !== lastFinalTranscript + interimTranscript) {
-                transcriptElement.innerText = lastFinalTranscript + interimTranscript;
-            }
+    // Update interim transcript only if it has changed
+    if (transcriptElement.innerText !== lastFinalTranscript + interimTranscript) {
+        transcriptElement.innerText = lastFinalTranscript + interimTranscript;
+    }
 
-            if (finalTranscript) {
-                clearTimeout(updateTimeout);
-                lastFinalTranscript += finalTranscript; // Append new final transcript
-                
-                updateTimeout = setTimeout(() => {
-                    transcriptElement.innerText = lastFinalTranscript; // Keep all spoken words
-                }, 500); // Add slight delay to avoid excessive updates
-            }
+    if (finalTranscript) {
+        clearTimeout(updateTimeout);
+        lastFinalTranscript += finalTranscript; // Append new final transcript
         
- 
-            // Clear the previous timeout (reset the silence detection)
-            clearTimeout(timeout);
+        updateTimeout = setTimeout(() => {
+            transcriptElement.innerText = lastFinalTranscript; // Keep all spoken words
+        }, 500); // Add slight delay to avoid excessive updates
+    }
 
 // Function to clear the transcript
 function clearTranscript() {
@@ -268,7 +266,7 @@ function createLookUpPrompt() {
         promptDiv.style.zIndex = '1000';
 
         // Add the prompt text
-        promptDiv.innerHTML = 'LIE DOWN<br>& LOOK UP';
+        promptDiv.innerHTML = 'LIE DOWN & LOOK UP';
 
         // Append the prompt to the body
         document.body.appendChild(promptDiv);
@@ -311,9 +309,9 @@ function handleOrientation(event) {
     if ((smoothedBeta >= betaTarget - betaThreshold || smoothedBeta <= betaTarget + betaThreshold) &&
         Math.abs(smoothedGamma) <= gammaThreshold) {
         // Device is in the desired range (facing downward)
+        removeLookUpPrompt();
         document.getElementById('street-view').style.display = 'block';
         document.getElementById('transcript').style.display = 'block';
-        removeLookUpPrompt();
     } else {
         // Device is outside the desired range (not facing downward)
         document.getElementById('street-view').style.display = 'none';
@@ -328,7 +326,6 @@ window.addEventListener("deviceorientation", handleOrientation);
 
 // Start speech recognition after checking microphone permission
 checkMicrophonePermission();
-checkOrientationPermission();
 
     </script>
 </body>
