@@ -311,9 +311,9 @@ function handleOrientation(event) {
     if ((smoothedBeta >= betaTarget - betaThreshold || smoothedBeta <= betaTarget + betaThreshold) &&
         Math.abs(smoothedGamma) <= gammaThreshold) {
         // Device is in the desired range (facing downward)
-        removeLookUpPrompt();
         document.getElementById('street-view').style.display = 'block';
         document.getElementById('transcript').style.display = 'block';
+        removeLookUpPrompt();
     } else {
         // Device is outside the desired range (not facing downward)
         document.getElementById('street-view').style.display = 'none';
