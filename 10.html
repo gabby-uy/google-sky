@@ -79,11 +79,15 @@
 
 
     <script>
+
+    let hasLoadedOnce = false;
+
         let panorama;
         let fadeOverlay = document.getElementById("fade-overlay");
         let lookUpPrompt = document.getElementById("lookUpPrompt");
         let transcript = document.getElementById("transcript");
         let backgroundaudio = new Audio("audio/birds.mp3");
+        
 
         let thunderaudio = new Audio("audio/thunder-strike.mp3"); // Second audio clip
         thunderaudio.preload = "auto";
@@ -160,6 +164,9 @@ function handleOrientation(event) {
                 console.log("Thunder audio skipped this time.");
             }
 
+
+
+
             // Fade out the current panorama
             fadeOverlay.style.opacity = 1; // Show fade overlay (black screen)
 
@@ -167,11 +174,45 @@ function handleOrientation(event) {
                 if (status === "OK") {
                     // New panorama found, load it
                     showStreetView(data.location.latLng);
+
+                    // Set the flag after the first successful load
+                    if (!hasLoadedOnce) {
+                        hasLoadedOnce = true; // Set the flag after the first call
+                    } else {
+                        // Flash PNG only after the first time loadStreetView is called
+                        flashPNG();
+                    }
                 } else {
                     loadStreetView(); // Retry if location not found
                 }
             });
         }
+
+// Function to flash the PNG
+function flashPNG() {
+    // Delay in milliseconds (e.g., 100ms)
+    const delay = 500;
+
+    setTimeout(() => {
+        const flashImage = document.createElement("img");
+        flashImage.src = "images/star.png"; // Replace with your PNG file
+        flashImage.style.position = "fixed";
+        flashImage.style.left = `${Math.random() * 80 + 10}vw`; // Random horizontal position between 10vw and 90vw
+        flashImage.style.top = `${Math.random() * 80 + 10}vh`; // Random vertical position between 10vh and 90vh
+        flashImage.style.zIndex = "1000"; // Ensure it's above everything
+        flashImage.style.width = "50px"; // Adjust as needed
+        flashImage.style.pointerEvents = "none"; // Prevent interaction
+
+        // Add the image to the body
+        document.body.appendChild(flashImage);
+
+        // Remove PNG after 1 seconds
+        setTimeout(() => {
+            document.body.removeChild(flashImage);
+        }, 1000); // 1000ms = 1 seconds
+
+    }, delay); // Delay before showing the image
+}
 
                 // Function to request microphone permission
                 function checkMicrophonePermission() {
