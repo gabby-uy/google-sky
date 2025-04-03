@@ -87,12 +87,12 @@
         let lookUpPrompt = document.getElementById("lookUpPrompt");
         let transcript = document.getElementById("transcript");
         let backgroundaudio = new Audio("audio/birds.mp3");
-        
-
         let thunderaudio = new Audio("audio/thunder-strike.mp3"); // Second audio clip
-        thunderaudio.preload = "auto";
 
-         
+        thunderaudio.load();
+        thunderaudio.preload = "auto";
+        thunderaudio.volume = 1;
+    
         // Load and play background audio  
         backgroundaudio.loop = true;
         backgroundaudio.volume = 0.5;
@@ -137,7 +137,7 @@ function handleOrientation(event) {
         // Handle speech recognition events
         recognition.onstart = () => {
             console.log("Speech detected, pausing audio...");
-            backgroundaudio.volume = 0.2;
+            backgroundaudio.volume = 0.5;
             
         };
 
@@ -289,7 +289,7 @@ function flashPNG() {
         loadStreetView();  
 
         // Restore background audio volume after timeout
-        backgroundaudio.volume = 0.5; 
+        backgroundaudio.volume = 0.7; 
         console.log("Restoring background audio volume...");
     }, 1500); // 1500 milliseconds = 1.5 seconds of silence
 };       
