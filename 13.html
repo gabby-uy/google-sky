@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
+    <title>Random Street View of the Sky</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG-d5ErJgGF6wk0TUKnyGSKccAFdItXs0"></script>
+    <style>
+        /* Full viewport height and width for street-view container */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #street-view {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 1s ease-in-out; /* Smooth fade-in effect */
+            display: none;
+            
+        }
+
+        #fade-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: whitesmoke;
+            opacity: 0;
+            z-index: 10; /* Layer above the street view */
+            transition: opacity 1s ease-in-out;
+        }
+
+        #transcript {
+            font-size: 24px;
+            color: black;
+            max-width: 80%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            font-family:Helvetica, sans-serif;
+            text-align: center;
+        }
+
+        #enable-orientation{
+            z-index: 101;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: Helvetica, sans-serif;
+            font-size: 24px;
+            color:black;
+            outline: black;
+            fill: white;
+        }
+
+    #lookUpPrompt{
+        display:none;
+    }
+
+    #weather-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color:none;
+            color:black;
+            font-size: 24px;
+            font-family: Helvetica, sans-serif;
+            z-index: 1001;
+            max-width: 300px;
+    }
+
+    </style>
+
+
+</head>
+<body>
+    <div id="fade-overlay"></div>
+    <div id="street-view"></div>
+    <div id="transcript">I'm listening...</div>
+    <button id="enable-orientation" onclick="requestOrientationPermission(); backgroundaudio.play()">START</button>
+
+    <script>
+
+    let hasLoadedOnce = false;
+
+        let panorama;
+        let fadeOverlay = document.getElementById("fade-overlay");
+        let lookUpPrompt = document.getElementById("lookUpPrompt");
+        let transcript = document.getElementById("transcript");
+        let backgroundaudio = new Audio("audio/birds.mp3");
+        let thunderaudio = new Audio("audio/thunder-strike.mp3"); // Second audio clip
+
+        thunderaudio.load();
+        thunderaudio.preload = "auto";
+        thunderaudio.volume = 1;
+    
+        // Load and play background audio  
+        backgroundaudio.loop = true;
+        backgroundaudio.volume = 0.5;
+
+        window.addEventListener('deviceorientation', handleOrientation, true);
+
+
+       
+function hideButton() {
+            document.getElementById('enable-orientation').style.display = 'none';
+        }
+
+        function requestOrientationPermission() {
+            // Hide the button right when clicked
+            hideButton();
+
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS 13+
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        } else {
+                            alert('Orientation permission not granted.');
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Non-iOS 13+
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+}
+
+function handleOrientation(event) {
+    // Process orientation data
+}
+
+        // Initialize Speech Recognition
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.continuous = true;  // Enable continuous listening
+        recognition.interimResults = false;  // Allow interim results
+
+        // Handle speech recognition events
+        recognition.onstart = () => {
+            console.log("Speech detected, pausing audio...");
+            backgroundaudio.volume = 0.5;
+            
+        };
+
+        recognition.onspeechend = () => {
+        }
+
+        let timeout; // Timeout variable to track silence
+
+
+
+        // Function to load a random street view location
+        function loadStreetView() {
+            let svService = new google.maps.StreetViewService();
+            let lat = (Math.random() * 180 - 90).toFixed(6);
+            let lng = (Math.random() * 360 - 180).toFixed(6);
+            let location = { lat: parseFloat(lat), lng: parseFloat(lng) };
+
+            // 30% chance to play thunder audio
+            if (Math.random() < 0.3) {  
+                thunderaudio.play().catch(error => {
+                    console.error("Error playing thunder audio:", error);
+                });
+            } else {
+                console.log("Thunder audio skipped this time.");
+            }
+
+
+        // Function to get weather data for a given location (latitude and longitude)
+        function getWeather(lat, lng, callback) {
+            const apiKey = '66a7a5df600d9c45e18437f40f44b278'; // Replace with your OpenWeatherMap API key
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${apiKey}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const weatherData = {
+                        location: data.name,           // City name as location
+                        temperature: data.main.temp,  // Temperature in Celsius
+                        humidity: data.main.humidity, // Humidity as percentage
+                        wind: data.wind.speed,        // Wind speed in m/s
+                        
+                    };
+                    callback(weatherData);
+                })
+                .catch(error => {
+                    console.error("Error fetching weather data:", error);
+                    callback(null);  // In case of error, return null
+                });
+        }
+
+        // Function to display random weather data (temperature, humidity, or wind)
+        function displayRandomWeather(lat, lng) {
+    getWeather(lat, lng, (weatherData) => {
+        if (weatherData) {
+            const weatherOptions = ["temperature", "humidity", "wind"];
+            const randomChoice = weatherOptions[Math.floor(Math.random() * weatherOptions.length)];
+
+            let weatherText = '';
+            switch (randomChoice) {
+                case "temperature":
+                    weatherText = `Temperature: ${weatherData.temperature}°C`;
+                    break;
+                case "humidity":
+                    weatherText = `Humidity: ${weatherData.humidity}%`;
+                    break;
+                case "wind":
+                    weatherText = `Wind: ${weatherData.wind} m/s`;
+                    break;
+            }
+
+            // Flash the location first, then the weather info
+            flashWeatherInfo(weatherData.location, weatherText);
+        } else {
+            console.error('Weather data not available');
+        }
+    });
+}
+
+function flashWeatherInfo(location, text) {
+    // Create a container for both location and weather text
+    const weatherDiv = document.createElement("div");
+
+    // Create location text
+    const locationText = document.createElement("div");
+    locationText.innerText = location.toUpperCase();
+    locationText.style.fontSize = "24px"; // Larger font for location
+    locationText.style.marginBottom = "10px"; // Space between location and weather info
+
+    // Create weather info text
+    const weatherText = document.createElement("div");
+    weatherText.innerText = text.toUpperCase();
+    weatherText.style.fontSize = "24px"; // Smaller font for weather info
+
+    // Append the location and weather text to the container
+    weatherDiv.appendChild(locationText);
+    weatherDiv.appendChild(weatherText);
+
+    // Style the container
+    weatherDiv.style.position = "fixed";
+    weatherDiv.style.top = "50%";
+    weatherDiv.style.left = "50%";
+    weatherDiv.style.transform = "translate(-50%, -50%)";
+    weatherDiv.style.zIndex = "1000";
+    weatherDiv.style.fontFamily = "Helvetica, sans-serif";
+    weatherDiv.style.color = "black"; // Text color
+    weatherDiv.style.textAlign = "center";
+    weatherDiv.style.pointerEvents = "none";
+    weatherDiv.style.whiteSpace = "pre-line"; // Keep line breaks
+
+    document.body.appendChild(weatherDiv);
+
+    // Flashing effect for 3 seconds
+    setTimeout(() => {
+        weatherDiv.remove();
+    }, 3000); // Remove after 3 seconds
+}
+
+            // Fade out the current panorama
+            fadeOverlay.style.opacity = 1; // Show fade overlay (black screen)
+
+            svService.getPanorama({ location: location, radius: 50000, source: 'outdoor' }, function(data, status) {
+                if (status === "OK") {
+                    // New panorama found, load it
+                    showStreetView(data.location.latLng);
+                    
+
+                    // Set the flag after the first successful load
+                    if (!hasLoadedOnce) {
+                        hasLoadedOnce = true; // Set the flag after the first call
+                    } else {
+                        // Flash weather info only after the first time loadStreetView is called
+                        displayRandomWeather(parseFloat(lat), parseFloat(lng));
+                    }
+                } else {
+                    loadStreetView(); // Retry if location not found
+                }
+            });
+        }
+
+
+
+function flashWeatherInfo(text) {
+    const weatherDiv = document.createElement("div");
+    weatherDiv.innerText = text.toUpperCase();
+
+        weatherDiv.style.position = "fixed";
+        weatherDiv.style.top = "50%";
+        weatherDiv.style.left = "50%";
+        weatherDiv.style.transform = "translate(-50%, -50%)";
+        weatherDiv.style.zIndex = "1000";
+        weatherDiv.style.fontSize = "24px";
+        weatherDiv.style.fontFamily = "Helvetica, sans-serif";
+        weatherDiv.style.color = "black";
+        weatherDiv.style.textShadow = "2px 2px 4px black, -2px -2px 4px black, 2px -2px 4px black, -2px 2px 4px black";;
+        weatherDiv.style.backgroundColor = "none";
+        weatherDiv.style.padding = "none";
+        weatherDiv.style.borderRadius = "none";
+        weatherDiv.style.boxShadow = "none";
+        weatherDiv.style.pointerEvents = "none";
+        weatherDiv.style.textAlign = "center";
+        weatherDiv.style.whiteSpace = "pre-line"; // Keep line breaks
+
+    document.body.appendChild(weatherDiv);
+
+    setTimeout(() => {
+        weatherDiv.remove();
+    }, 4000);
+}
+
+                // Function to request microphone permission
+                function checkMicrophonePermission() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then((stream) => {
+                    console.log('Microphone permission granted');
+                    // Now that permission is granted, start the speech recognition
+                    recognition.start();
+
+                    // After microphone permission is granted, load the Street View
+                    loadStreetView();
+                })
+                .catch((error) => {
+                    console.error('Microphone permission denied:', error);
+                    alert('Microphone access is required for this website to work.');
+                });
+        }
+
+        // Function to show street view with the new location
+        function showStreetView(location) {
+            // Remove the previous panorama (if any)
+            if (panorama) {
+                panorama.setVisible(false);
+            }
+
+            // Create a new panorama object
+            panorama = new google.maps.StreetViewPanorama(
+                document.getElementById("street-view"),
+                {
+                    position: location,
+                    pov: { heading: 0, pitch: 90 },
+                    zoom: 1,
+                    disableDefaultUI: true,
+                    showRoadLabels: false,
+                    gestureHandling: "none",
+                    rotateControl: false, // Hide rotate control
+                    scaleControl: false, // Hide scale control
+                    motionTracking: false,
+                }
+            );
+
+            let map = new google.maps.Map(document.createElement("div"));
+            map.setStreetView(panorama);
+
+            // Fade in the new panorama
+            fadeOverlay.style.opacity = 0; // Hide fade overlay (black screen)
+            document.getElementById("street-view").style.opacity = 1; // Ensure the panorama is visible
+        }
+
+        recognition.onresult = (event) => {
+            let finalTranscript = '';
+            let interimTranscript = '';
+
+            // Iterate through the results
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const result = event.results[i];
+                if (result.isFinal) {
+                    finalTranscript += result[0].transcript + '\n';
+                } else {
+                    interimTranscript += result[0].transcript;
+                }
+            }
+
+            /* Update the transcript display
+            document.getElementById('transcript').innerText = finalTranscript + interimTranscript;*/
+
+            // Clear the previous timeout (reset the silence detection)
+            clearTimeout(timeout);
+
+
+    // Set a timeout for when silence is detected
+    timeout = setTimeout(async () => { 
+        await clearTranscript();  
+        loadStreetView();  
+
+        // Restore background audio volume after timeout
+        backgroundaudio.volume = 0.7; 
+        console.log("Restoring background audio volume...");
+    }, 1500); // 1500 milliseconds = 1.5 seconds of silence
+};       
+
+// Function to clear the transcript
+function clearTranscript() {
+    return new Promise((resolve) => {
+        document.getElementById("transcript").innerText = '';
+        resolve();
+    });
+}
+
+
+// Function to create and display the "Look up" prompt
+function createLookUpPrompt() {
+    // Check if the prompt already exists to avoid duplicates
+    if (!document.getElementById('lookUpPrompt')) {
+        // Create the div element
+        const promptDiv = document.createElement('div');
+        promptDiv.id = 'lookUpPrompt';
+        promptDiv.style.position = 'fixed';
+        promptDiv.style.top = '0';
+        promptDiv.style.left = '0';
+        promptDiv.style.width = '100%';
+        promptDiv.style.height = '100%';
+        promptDiv.style.backgroundColor = 'black';
+        promptDiv.style.color = 'white';
+        promptDiv.style.display = 'flex';
+        promptDiv.style.justifyContent = 'center'; // Center horizontally
+        promptDiv.style.alignItems = 'center'; // Center vertically
+        promptDiv.style.fontSize = '24px';
+        promptDiv.style.fontFamily = 'Helvetica, sans-serif';
+        promptDiv.style.textAlign = 'center';
+        promptDiv.style.zIndex = '1000';
+
+        // Add the prompt text
+        promptDiv.innerHTML = 'LAY DOWN & LOOK UP';
+
+        // Append the prompt to the body
+        document.body.appendChild(promptDiv);
+    }
+    backgroundaudio.pause();
+}
+
+// Function to remove the "Look up" prompt
+function removeLookUpPrompt() {
+    const promptDiv = document.getElementById('lookUpPrompt');
+    if (promptDiv) {
+        promptDiv.remove();
+    }
+    backgroundaudio.play();
+}
+
+let smoothedBeta = -180; // Initialize smoothed values
+let smoothedGamma = 0;
+const alpha = 0.1; // Smoothing factor (higher = faster response)
+
+function handleOrientation(event) {
+    let beta = event.beta; // Use the raw beta value
+    let gamma = event.gamma; // Rotation around the Y-axis (tilt left/right)
+
+    // Apply smoothing to reduce noise
+    smoothedBeta = alpha * beta + (1 - alpha) * smoothedBeta;
+    smoothedGamma = alpha * gamma + (1 - alpha) * smoothedGamma;
+
+    // Define thresholds
+    const betaTarget = -180; // Target angle for downward-facing
+    const betaThreshold = 30; // Allowed error range from -180 degrees
+    const gammaThreshold = 30; // Allowed range for left/right tilt
+
+    console.log(`Beta: ${smoothedBeta}, Gamma: ${smoothedGamma}`); // Debugging logs
+
+    // Check if the device is facing the ground (within 30 degrees)
+if (
+    smoothedBeta === betaTarget || // Explicit check for exactly -180
+    (smoothedBeta >= betaTarget - betaThreshold && smoothedBeta <= betaTarget + betaThreshold) ||
+    (smoothedBeta >= 180 - betaThreshold && smoothedBeta <= 180 + betaThreshold)
+) {
+        // Device is facing the ground within the tolerance (no "Look Up" prompt)
+        removeLookUpPrompt();
+        document.getElementById('street-view').style.display = 'block';
+        document.getElementById('transcript').style.display = 'block';
+    } else {
+        // Device is not facing the ground (show the "Look Up" prompt)
+        createLookUpPrompt();
+        document.getElementById('street-view').style.display = 'none';
+        document.getElementById('transcript').style.display = 'none';
+    }
+}
+
+// Listen for device orientation events
+window.addEventListener("deviceorientation", handleOrientation);
+
+// Start speech recognition after checking microphone permission
+checkMicrophonePermission();
+checkOrientationPermission();
+
+// Restart recognition if it stops unexpectedly
+recognition.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+            recognition.start(); // Restart if an error occurs
+        };
+
+        const WEATHER_API_KEY = "66a7a5df600d9c45e18437f40f44b278"; // Replace with your actual API key
+
+    </script>
+    <div id="weather-info"></div>
+</body>
+</html>

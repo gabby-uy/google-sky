@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Random Weather Generator</title>
+</head>
+<body>
+  <h1>Get Random Weather Location</h1>
+  <button onclick="getWeather()">Generate Random Weather</button>
+
+  <h2>Result:</h2>
+  <pre id="result">—</pre>
+
+  <script>
+    function getRandomCoordinates() {
+      const lat = (Math.random() * 180 - 90).toFixed(4);  // -90 to +90
+      const lon = (Math.random() * 360 - 180).toFixed(4); // -180 to +180
+      return { lat, lon };
+    }
+
+    async function getWeather() {
+      const { lat, lon } = getRandomCoordinates();
+      const apiKey = "66a7a5df600d9c45e18437f40f44b278"; // Replace with your actual API key
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById("result").textContent =
+            `🌍 Random Coordinates:\nLatitude: ${lat}, Longitude: ${lon}\n\n` +
+            `📍 Location: ${data.name || "Unknown"}\n` +
+            `🌤️ Weather: ${data.weather[0].description}\n` +
+            `🌡️ Temp: ${data.main.temp}°C\n` +
+            `💧 Humidity: ${data.main.humidity}%\n` +
+            `🌬️ Wind: ${data.wind.speed} m/s`;
+        } else {
+          document.getElementById("result").textContent = 
+            `Coordinates: ${lat}, ${lon}\n\nError: ${data.message}`;
+        }
+      } catch (error) {
+        document.getElementById("result").textContent = `Fetch error: ${error}`;
+      }
+    }
+  </script>
+</body>
+</html>
