@@ -259,7 +259,10 @@ function handleOrientation(event) {
 
 function flashWeatherInfo(location, text) {
 
-    const existingWeatherDisplay = document.getElementById("displayedWeather");
+    const existingWeatherDiv = document.getElementById("weatherDisplay");
+    if (existingWeatherDiv) {
+        existingWeatherDiv.remove();
+    }
 
     // Create a container for both location and weather text
     const weatherDiv = document.createElement("div");
@@ -338,12 +341,8 @@ function showRandomImage() {
 
       function randomDisplay() {
         const existingImage = document.getElementById('displayedImage');
-        const existingWeatherDisplay = document.getElementById('displayedWeather');
         if (existingImage) {    
                 existingImage.remove();
-        }
-        if (existingWeatherDisplay) {
-                existingWeatherDisplay.remove();
         }
         const roll = Math.random(); // Gives a number from 0 to 1
         if (roll < 0.35) {
@@ -398,13 +397,12 @@ function flashWeatherInfo(text) {
         weatherDiv.style.pointerEvents = "none";
         weatherDiv.style.textAlign = "center";
         weatherDiv.style.whiteSpace = "pre-line"; // Keep line breaks
-        
 
     document.body.appendChild(weatherDiv);
-    /*
+
     setTimeout(() => {
         weatherDiv.remove();
-    }, 4000);*/
+    }, 4000);
 }
 
                 // Function to request microphone permission
@@ -495,11 +493,6 @@ function clearTranscript() {
     });
 }
 
-recognition.onend = () => {
-  console.log("Speech recognition ended, restarting...");
-  recognition.start();
-};
-
 
 // Function to create and display the "Look up" prompt
 function createLookUpPrompt() {
@@ -530,8 +523,6 @@ function createLookUpPrompt() {
         document.body.appendChild(promptDiv);
     }
     backgroundaudio.pause();
-
-
 }
 
 // Function to remove the "Look up" prompt
@@ -572,13 +563,9 @@ if (
         removeLookUpPrompt();
         document.getElementById('street-view').style.display = 'block';
         document.getElementById('transcript').style.display = 'block';
-        existingImage.show()
-        existingWeatherDiv.show()
     } else {
         // Device is not facing the ground (show the "Look Up" prompt)
         createLookUpPrompt();
-        existingImage.hide();
-        existingWeatherDiv.hide();
         document.getElementById('street-view').style.display = 'none';
         document.getElementById('transcript').style.display = 'none';
     }
