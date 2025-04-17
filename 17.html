@@ -259,7 +259,7 @@ function handleOrientation(event) {
 
 function flashWeatherInfo(location, text) {
 
-    const existingWeatherDiv = document.getElementById("weatherDisplay");
+    const existingWeatherDisplay = document.getElementById("displayedWeather");
 
     // Create a container for both location and weather text
     const weatherDiv = document.createElement("div");
@@ -338,12 +338,12 @@ function showRandomImage() {
 
       function randomDisplay() {
         const existingImage = document.getElementById('displayedImage');
-        const existingWeatherDiv = document.getElementById('weatherDiv');
+        const existingWeatherDisplay = document.getElementById('displayedWeather');
         if (existingImage) {    
                 existingImage.remove();
         }
-        if (existingWeatherDiv) {
-                existingWeatherDiv.remove();
+        if (existingWeatherDisplay) {
+                existingWeatherDisplay.remove();
         }
         const roll = Math.random(); // Gives a number from 0 to 1
         if (roll < 0.35) {
@@ -398,6 +398,7 @@ function flashWeatherInfo(text) {
         weatherDiv.style.pointerEvents = "none";
         weatherDiv.style.textAlign = "center";
         weatherDiv.style.whiteSpace = "pre-line"; // Keep line breaks
+        
 
     document.body.appendChild(weatherDiv);
     /*
