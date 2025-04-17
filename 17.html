@@ -113,7 +113,7 @@
     
         // Load and play background audio  
         backgroundaudio.loop = true;
-        backgroundaudio.volume = 0.5;
+        backgroundaudio.volume = 0.7;
 
         function enableAudioPlayback() {
                 document.removeEventListener('click', enableAudioPlayback);
@@ -178,7 +178,7 @@ function handleOrientation(event) {
         // Handle speech recognition events
         recognition.onstart = () => {
             console.log("Speech detected, pausing audio...");
-            backgroundaudio.volume = 0.5;
+            backgroundaudio.volume = 0.7;
             
         };
 
