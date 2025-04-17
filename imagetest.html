@@ -1,0 +1,37 @@
+<body>
+    <div id="image-container"></div>
+  
+    <script>
+      function showRandomImage() {
+        const folder = 'webp/';
+        const imageFiles = [
+          'randomimage_1.webp',
+          'randomimage_2.webp',
+          'randomimage_3.webp',
+          'randomimage_4.webp',
+          'randomimage_5.webp'
+        ];
+  
+        const randomIndex = Math.floor(Math.random() * imageFiles.length);
+        const selectedImage = folder + imageFiles[randomIndex];
+  
+        const img = document.createElement('img');
+        img.src = selectedImage;
+        img.style.width = '80vw';
+        img.style.height = 'auto';
+        img.style.display = 'block';
+        img.style.margin = 'auto';
+        img.style.position = 'absolute';
+        img.style.top = '50%';
+        img.style.left = '50%';
+        img.style.transform = 'translate(-50%, -50%)';
+  
+        const container = document.getElementById('image-container');
+        container.innerHTML = ''; // Clear just the image
+        container.appendChild(img);
+      }
+  
+      document.body.addEventListener('click', showRandomImage);
+    </script>
+  </body>
+  
