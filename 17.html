@@ -400,9 +400,9 @@ function flashWeatherInfo(text) {
 
     document.body.appendChild(weatherDiv);
 
-    setTimeout(() => {
+    /*setTimeout(() => {
         weatherDiv.remove();
-    }, 4000);
+    }, 4000);*/
 }
 
                 // Function to request microphone permission
@@ -514,7 +514,7 @@ function createLookUpPrompt() {
         promptDiv.style.fontSize = '24px';
         promptDiv.style.fontFamily = 'Helvetica, sans-serif';
         promptDiv.style.textAlign = 'center';
-        promptDiv.style.zIndex = '2000';
+        promptDiv.style.zIndex = '9999';
 
         // Add the prompt text
         promptDiv.innerHTML = 'LAY DOWN & LOOK UP <br> & TOUCH TO START';
