@@ -343,6 +343,10 @@ function showRandomImage() {
         if (existingImage) {    
                 existingImage.remove();
         }
+        const existingWeatherDiv = document.getElementById("weatherDisplay");
+    if (existingWeatherDiv) {
+        existingWeatherDiv.remove();
+    }
         const roll = Math.random(); // Gives a number from 0 to 1
         if (roll < 0.35) {
             showRandomImage(); // 35% chance
