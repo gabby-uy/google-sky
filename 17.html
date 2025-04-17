@@ -260,9 +260,6 @@ function handleOrientation(event) {
 function flashWeatherInfo(location, text) {
 
     const existingWeatherDiv = document.getElementById("weatherDisplay");
-    if (existingWeatherDiv) {
-        existingWeatherDiv.remove();
-    }
 
     // Create a container for both location and weather text
     const weatherDiv = document.createElement("div");
@@ -343,6 +340,9 @@ function showRandomImage() {
         const existingImage = document.getElementById('displayedImage');
         if (existingImage) {    
                 existingImage.remove();
+        }
+        if (existingWeatherDiv) {
+                existingWeatherDiv.remove();
         }
         const roll = Math.random(); // Gives a number from 0 to 1
         if (roll < 0.35) {
@@ -493,6 +493,11 @@ function clearTranscript() {
     });
 }
 
+recognition.onend = () => {
+  console.log("Speech recognition ended, restarting...");
+  recognition.start();
+};
+
 
 // Function to create and display the "Look up" prompt
 function createLookUpPrompt() {
@@ -523,6 +528,9 @@ function createLookUpPrompt() {
         document.body.appendChild(promptDiv);
     }
     backgroundaudio.pause();
+    existingImage.remove();
+    existingWeatherDiv.remove();
+
 }
 
 // Function to remove the "Look up" prompt
