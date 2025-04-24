@@ -348,10 +348,10 @@ function showRandomImage() {
         existingWeatherDiv.remove();
     }
         const roll = Math.random(); // Gives a number from 0 to 1
-        if (roll < 0.35) {
-            showRandomImage(); // 35% chance
+        if (roll < 0.4) {
+            showRandomImage(); // 40% chance
         } else {
-            displayRandomWeather(parseFloat(lat), parseFloat(lng)); // 65% chance
+            displayRandomWeather(parseFloat(lat), parseFloat(lng)); // 60% chance
         }
         }
 
